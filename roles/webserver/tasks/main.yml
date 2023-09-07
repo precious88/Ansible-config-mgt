@@ -14,7 +14,7 @@
 - name: clone a repo
   become: true
   ansible.builtin.git:
-    repo: https://github.com/precious88/Ansible-config-mgt.git
+    repo: https://github.com/precious88/tooling.git
     dest: /var/www/html
     force: yes
 
