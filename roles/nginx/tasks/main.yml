@@ -37,8 +37,8 @@
     path: /etc/hosts
     block: |
       {{ item.ip }} {{ item.name }}
- loop:
-   -  { name: web1, ip: 172.31.33.191 }      
+  loop:
+    - { name: web1, ip: 172.31.33.191 }      
 
 # Nginx setup.
 - name: Copy nginx configuration in place.
