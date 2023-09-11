@@ -1,6 +1,4 @@
 ---
-- name: Loadbalancers assignment
-  hosts: lb
-  tasks:
-    - import_playbook: ../static-assignments/loadbalancer.yml
+- name: mport Loadbalancers assignment
+  import_playbook: ../static-assignments/loadbalancer.yml
   when: load_balancer_is_required
