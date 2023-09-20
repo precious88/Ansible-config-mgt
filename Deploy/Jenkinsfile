@@ -2,7 +2,6 @@
     agent any
 
 
-      stages{
       stage("Initial cleanup") {
           steps {
             dir("${WORKSPACE}") {
@@ -11,7 +10,6 @@
           }
         }
 
-  stages {
     stage('Build') {
       steps {
         script {
@@ -19,7 +17,6 @@
         }
       }
     }
-  }
 
     stage('Test') {
       steps {
@@ -51,6 +48,4 @@
         }
    }
 
- }
-
- }
+ } 
