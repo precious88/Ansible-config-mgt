@@ -1,4 +1,8 @@
 ---
-- name: mport Loadbalancers assignment
-  import_playbook: ../static-assignments/loadbalancer.yml
-  when: load_balancer_is_required
+#- name: mport Loadbalancers assignment
+#  import_playbook: ../static-assignments/loadbalancer.yml
+#  when: load_balancer_is_required
+
+ - hosts: nginx
+ - name: nginx assignment
+   ansible.builtin.import_playbook: ../static-assignments/nginx.yml
