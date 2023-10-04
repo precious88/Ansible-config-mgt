@@ -2,7 +2,7 @@ pipeline {
     agent any
 
       environment {
-      ANSIBLE_CONFIG="${WORKSPACE}/deploy/ansible.cfg"
+      ANSIBLE_CONFIG="${WORKSPACE}/Deploy/ansible.cfg"
     }
 
     stages{
@@ -29,7 +29,7 @@ pipeline {
 
       stage('Run Ansible playbook') {
         steps {
-           ansiblePlaybook become: true, colorized: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory/dev', playbook: 'playbooks/site.yml'
+           ansiblePlaybook become: true, colorized: true, credentialsId: 'private-key', disableHostKeyChecking: true, installation: 'ansible', inventory: 'inventory/dev.yml', playbook: 'playbooks/site.yml'
          }
       }
 
