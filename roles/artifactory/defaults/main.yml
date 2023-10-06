@@ -1,91 +1,96 @@
----
-artifactory_env: "dev"
-artifactory_name: "artifactory"
-artifactory_state: "present"
+# defaults file for artifactory
 
-# library versions, set these to override latest
-# artifactory_pypi_docker_version: 'x.x.x'
-artifactory_pypi_docker_compose_version: '1.15.0'
+# The version of artifactory to install
+artifactory_version: 7.24.3
 
-artifactory_port: "80"
+# Set this to true when SSL is enabled (to use artifactory_nginx_ssl role), default to false (implies artifactory uses artifactory_nginx role )
+artifactory_nginx_ssl_enabled: false
 
-# all postgres and artifactory data will be kept here
-artifactory_datapath: "/srv/artifactory"
+# Set this to false when ngnix is disabled, defaults to true (implies artifactory uses artifactory_nginx role )
+artifactory_nginx_enabled: false
 
-artifactory_postgres_image: "docker.bintray.io/postgres"
-artifactory_postgres_image_tag: "9.5.2"
-artifactory_postgres_user: "artifactory"
-artifactory_postgres_password: "password"
+# Provide single node license
+# artifactory_single_license:
 
-artifactory_image: "docker.bintray.io/jfrog/artifactory-pro"
-artifactory_image_tag: "latest"
-artifactory_javaopts: "-Xmx4g"
+# Provide individual (HA) licenses file separated by new line and 2-space indentation and set artifactory_ha_enabled: true.
+# Example:
+# artifactory_licenses: |-
+#   <license_1>
 
-artifactory_url: "{{ artifactory_name }}.example.com"
-artifactory_proxy_image: "nginx"
-artifactory_proxy_image_tag: "alpine"
-artifactory_proxy_config: |
-  ### defaults to NO SSL termination. expectation is that is handled separately.
-  ## add ssl entries when https has been set in config
-  # ssl_certificate      /moo/cert.crt;
-  # ssl_certificate_key  /moo/cert.key;
-  # ssl_session_cache shared:SSL:1m;
-  # ssl_prefer_server_ciphers   on;
+#   <license_2>
 
-  ## server configuration
-  server {
-      listen 80;
-      server_name ~(?<repo>.+)\.{{ artifactory_url }} {{ artifactory_url }};
+#   <license_3>
 
+# To enable HA, set to true
+artifactory_ha_enabled: false
 
-      ## Application specific logs
-      access_log /var/log/nginx/{{ artifactory_url }}-access.log combined;
-      error_log /var/log/nginx/{{ artifactory_url }}-error.log;
-      rewrite ^/$ /artifactory/webapp/ redirect;
-      rewrite ^/artifactory/?(/webapp)?$ /artifactory/webapp/ redirect;
-      rewrite ^/(v1|v2)/(.*) /artifactory/api/docker/$repo/$1/$2;
-      chunked_transfer_encoding on;
-      client_max_body_size 0;
+# By default, all nodes are primary (CNHA) - https://www.jfrog.com/confluence/display/JFROG/High+Availability#HighAvailability-Cloud-NativeHighAvailability
+artifactory_taskAffinity: any
 
-      location /artifactory/ {
-          if ($http_x_forwarded_proto = '') {
-            set $http_x_forwarded_proto  $scheme;
-          }
-          if ($http_x_forwarded_proto != 'https') {
-            rewrite ^ https://$host$request_uri? permanent;
-          }
+# The location where Artifactory should install
+jfrog_home_directory: /opt/jfrog
 
-          proxy_read_timeout  900;
-          proxy_pass_header   Server;
-          proxy_cookie_path   ~*^/.* /;
+# Pick the Artifactory flavour to install, can be also cpp-ce/jcr/pro
+artifactory_flavour: pro
 
-          # the following URLs refer to the Docker link and native port
-          if ( $request_uri ~ ^/artifactory/(.*)$ ) {
-              proxy_pass          http://artifactory:8081/artifactory/$1;
-          }
-          proxy_pass          http://artifactory:8081/artifactory/;
-          proxy_set_header    X-Artifactory-Override-Base-Url https://$host/artifactory;
-          proxy_set_header    X-Forwarded-Port  443;
-          proxy_set_header    X-Forwarded-Proto https;
-          proxy_set_header    Host              $http_host;
-          proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
-      }
+artifactory_extra_java_opts: -server -Xms512m -Xmx2g -Xss256k -XX:+UseG1GC
+artifactory_system_yaml_template: system.yaml.j2
+artifactory_tar_file_name: jfrog-artifactory-pro-{{ artifactory_version }}-linux.tar.gz
+artifactory_home: "{{ jfrog_home_directory }}/artifactory"
+artifactory_tar: https://releases.jfrog.io/artifactory/artifactory-pro/org/artifactory/pro/jfrog-artifactory-pro/{{ artifactory_version }}/{{ artifactory_tar_file_name }}
+artifactory_untar_home: "{{ jfrog_home_directory }}/artifactory-{{ artifactory_flavour }}-{{ artifactory_version }}"
 
-      location /artifactory/api/system/ping {
-          # same as /artifactory, but without the SSL redirect
-          proxy_read_timeout  900;
-          proxy_pass_header   Server;
-          proxy_cookie_path   ~*^/.* /;
+# Timeout in seconds for URL request
+artifactory_download_timeout: 10
 
-          # the following URLs refer to the Docker link and native port
-          if ( $request_uri ~ ^/artifactory/(.*)$ ) {
-              proxy_pass          http://artifactory:8081/artifactory/$1;
-          }
-          proxy_pass          http://artifactory:8081/artifactory/;
-          proxy_set_header    X-Artifactory-Override-Base-Url https://$host/artifactory;
-          proxy_set_header    X-Forwarded-Port  443;
-          proxy_set_header    X-Forwarded-Proto https;
-          proxy_set_header    Host              $http_host;
-          proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
-      }
-  }
+postgres_driver_version: 42.2.23
+postgres_driver_download_url: https://repo1.maven.org/maven2/org/postgresql/postgresql/{{ postgres_driver_version }}/postgresql-{{ postgres_driver_version }}.jar
+
+artifactory_user: artifactory
+artifactory_group: artifactory
+
+artifactory_daemon: artifactory
+
+artifactory_uid: 1030
+artifactory_gid: 1030
+
+# if this is an upgrade
+artifactory_upgrade_only: false
+
+#default username and password
+artifactory_admin_username: admin
+artifactory_admin_password: password
+
+artifactory_service_file: /lib/systemd/system/artifactory.service
+
+# Provide binarystore XML content below with 2-space indentation
+artifactory_binarystore: |-
+  <?xml version="1.0" encoding="UTF-8"?>
+  <config version="2">
+      <chain template="cluster-file-system"/>
+  </config>
+
+# Provide systemyaml content below with 2-space indentation
+artifactory_systemyaml: |-
+  configVersion: 1
+  shared:
+    security:
+      joinKey: "{{ join_key }}"
+    extraJavaOpts: "{{ artifactory_extra_java_opts }}"
+    node:
+      id: {{ ansible_hostname }}
+      ip: {{ ansible_host }}
+      taskAffinity: {{ artifactory_taskAffinity }}
+      haEnabled: {{ artifactory_ha_enabled }}
+    database:
+      type: "{{ artifactory_db_type }}"
+      driver: "{{ artifactory_db_driver }}"
+      url: "{{ artifactory_db_url }}"
+      username: "{{ artifactory_db_user }}"
+      password: "{{ artifactory_db_password }}"
+  router:
+    entrypoints:
+      internalPort: 8046
+
+# Note: artifactory_systemyaml_override is by default false,  if you want to change default artifactory_systemyaml
+artifactory_systemyaml_override: false
