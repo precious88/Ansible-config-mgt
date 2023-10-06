@@ -1,0 +1,38 @@
+galaxy_info:
+  author: Shaun Martin
+  description: Stands up Artifactory as a Docker Compose based service.
+  license: BSD
+  min_ansible_version: 2.1
+  platforms:
+  - name: EL
+    versions:
+      - 6
+      - 7
+  - name: Debian
+    versions:
+    - jessie
+  - name: Ubuntu
+    versions:
+    - trusty
+    - xenial
+
+  galaxy_tags:
+    - artifactory
+    - jfrog
+    - maven
+    - pypi
+    - npm
+    - rpm
+    - yum
+    - deb
+    - apt
+    - web
+    - docker
+    - compose
+    - docker-compose
+    - development
+    - build
+    - ci
+    - continuousintegration
+
+dependencies: []
