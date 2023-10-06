@@ -1,2 +1,7 @@
 ---
-# defaults file for docker-compose-artifactory
+# handlers file for distribution
+- name: restart artifactory
+  become: yes
+  systemd:
+    name: "{{ artifactory_daemon }}"
+    state: restarted

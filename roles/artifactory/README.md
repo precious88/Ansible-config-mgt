@@ -1,36 +1,28 @@
-# ansible-role-artifactory
+# artifactory
+The artifactory role installs the Artifactory Pro software onto the host. Per the Vars below, it will configure a node as primary or secondary. This role uses secondary roles artifactory_nginx to install nginx.
 
-## What?
+## Role Variables
+* _server_name_: **mandatory** This is the server name. eg. "artifactory.54.175.51.178.xip.io"
+* _artifactory_upgrade_only_: Perform an software upgrade only. Default is false.
 
-Stands up Artifactory as a Docker Compose based service.
+Additional variables can be found in [defaults/main.yml](./defaults/main.yml).
 
-## How?
-```bash
-yum clean all && yum update -y
-yum install -y git gcc python-devel openssl-devel
-
-# install pip - rhel only
-# curl --silent --show-error --retry 5 https://bootstrap.pypa.io/get-pip.py | sudo python2.7
-
-# workaround for rhel systems w/o subscription access
-# rpm -ivh http://mirror.centos.org/centos/7/extras/x86_64/Packages/container-selinux-2.10-2.el7.noarch.rpm
-
-pip install ansible
-
-echo -e """- src: geerlingguy.docker
-- src: inhumantsar.artifactory""" > requirements.yml
-
-ansible-galaxy install -r requirements.yml
-
-echo """---    
-- hosts: localhost
+## Example Playbook
+```
+---
+- hosts: artifactory_servers
   roles:
-   - geerlingguy.docker
-   - inhumantsar.artifactory""" > playbook.yml
-
-ansible-playbook playbook.yml
+    - artifactory
 ```
 
-### Decommission
-```bash
-ansible-playbook playbook.yml -e service_state=absent```
+## Upgrades
+The Artifactory role supports software upgrades. To use a role to perform a software upgrade only, use the _artifactory_upgrade_only_ variable and specify the version. See the following example.
+
+```
+- hosts: artifactory_servers
+  vars:
+    artifactory_version: "{{ lookup('env', 'artifactory_version_upgrade') }}"
+    artifactory_upgrade_only: true
+  roles:
+    - artifactory
+```
