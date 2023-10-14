@@ -4,9 +4,9 @@
 #  when: load_balancer_is_required
 
 
- - hosts: db
- - name: database assignment
-   import_playbook: ../static-assignments/database.yml
+ #- hosts: db
+ #- name: database assignment
+# import_playbook: ../static-assignments/database.yml
 
 # - hosts: nginx
 # - name: nginx assignment
@@ -20,6 +20,6 @@
 #- name: sonar assignment
 #  ansible.builtin.import_playbook: ../static-assignments/sonar.yml
 
-# - hosts: todo
-# - name: Deploy the todo application
-#   ansible.builtin.import_playbook: ../static-assignments/deployment.yml
+ - hosts: todo
+ - name: Deploy the todo application
+   ansible.builtin.import_playbook: ../static-assignments/deployment.yml
